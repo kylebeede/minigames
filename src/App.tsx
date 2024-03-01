@@ -28,7 +28,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/rotation-lock",
-    element: <div>{"rotation lock"}</div>,
+    element: <div>{"Rotation Lock"}</div>,
   },
 ]);
 

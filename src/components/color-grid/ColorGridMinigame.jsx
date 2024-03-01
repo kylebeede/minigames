@@ -14,8 +14,8 @@ function ColorGridMinigame() {
 
   const handleCellClick = useCallback(
     (i, j) => {
-      let historyGrid = grid.map((arr) => arr.slice());
-      let newGrid = grid.map((arr) => arr.slice());
+      const historyGrid = grid.map((arr) => arr.slice());
+      const newGrid = grid.map((arr) => arr.slice());
       if (selectedGridColor) {
         newGrid[i][j] = selectedGridColor;
       } else {
@@ -184,10 +184,10 @@ function calculateGrid() {
 }
 
 function recalculateGrid(grid, j, i, color, first) {
-  let hasMatchingTop = i !== 0 && grid[i - 1][j] === color;
-  let hasMatchingBottom = i !== HEIGHT - 1 && grid[i + 1][j] === color;
-  let hasMatchingLeft = j !== 0 && grid[i][j - 1] === color;
-  let hasMatchingRight = j !== WIDTH - 1 && grid[i][j + 1] === color;
+  const hasMatchingTop = i !== 0 && grid[i - 1][j] === color;
+  const hasMatchingBottom = i !== HEIGHT - 1 && grid[i + 1][j] === color;
+  const hasMatchingLeft = j !== 0 && grid[i][j - 1] === color;
+  const hasMatchingRight = j !== WIDTH - 1 && grid[i][j + 1] === color;
 
   if (color === "transparent") return false;
   if (
@@ -260,4 +260,4 @@ function getRandomColor() {
   return "blue";
 }
 
-export default ColorGridMinigame;
+export { ColorGridMinigame };

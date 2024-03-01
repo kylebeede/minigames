@@ -1,7 +1,6 @@
-import React from "react";
 import { App as AntApp, Layout, Menu } from "antd";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import ColorGridMinigame from "./components/color-grid-minigame.jsx";
+import { ColorGridMinigame } from "./components/color-grid";
 
 const { Content, Footer, Header } = Layout;
 

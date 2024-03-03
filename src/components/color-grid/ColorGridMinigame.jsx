@@ -102,7 +102,11 @@ function ColorGridMinigame() {
         <Button
           type="primary"
           onClick={handleGridUndo}
-          style={{ display: "flex" }}
+          style={{
+            display: "flex",
+            color: gridHistory.length === 0 ? "gray" : "#FFF",
+            borderColor: gridHistory.length === 0 ? "gray" : "#FFF",
+          }}
           disabled={gridHistory.length === 0}
         >
           Undo
@@ -120,7 +124,10 @@ function ColorGridMinigame() {
         className="grid-controls"
         style={{ display: "flex", alignItems: "center", marginTop: "16px" }}
       >
-        <Title level={5} style={{ textAlign: "left", margin: "0" }}>
+        <Title
+          level={5}
+          style={{ textAlign: "left", margin: "0", color: "#FFF" }}
+        >
           {"Modify grid: "}
         </Title>
         <div style={{ display: "flex" }}>

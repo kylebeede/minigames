@@ -40,8 +40,15 @@ function App() {
       : "color-grid";
   return (
     <AntApp style={{ width: "100%", height: "100%" }}>
-      <Layout style={{ width: "100%", height: "100%" }}>
-        <Header style={{ display: "flex", alignItems: "center" }}>
+      <Layout
+        style={{ width: "100%", height: "100%", backgroundColor: "#061221" }}
+      >
+        <Header
+          style={{
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           <div className="demo-logo" />
           <Menu
             theme="dark"
@@ -61,7 +68,15 @@ function App() {
         >
           <RouterProvider router={router} />
         </Content>
-        <Footer style={{ textAlign: "center" }}>Source: github</Footer>
+        <Footer
+          style={{
+            textAlign: "center",
+            backgroundColor: "#061221",
+            color: "#FFF",
+          }}
+        >
+          Source: github
+        </Footer>
       </Layout>
     </AntApp>
   );

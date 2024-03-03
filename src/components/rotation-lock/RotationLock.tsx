@@ -20,14 +20,7 @@ export function RotationLock() {
       color: getRandomColor(),
     }));
 
-    // generate key data, ensuring it doesn't exceed the number of circles
-    const generatedKeyData = Array.from(
-      { length: Math.min(7, generatedCircleData.length) },
-      () => ({
-        location: Math.floor(Math.random() * 12) * 30,
-        color: getRandomColor(),
-      })
-    );
+    // key data should be a subset of circle data with offset
 
     setCircleData(generatedCircleData);
     setKeyData(generatedCircleData);
@@ -62,7 +55,7 @@ export function RotationLock() {
             <path
               className={`key ${keyData.color}`}
               key={index}
-              d={segment(keyData.location / 30, keyData.color)}
+              d={segment(keyData.location / 30)}
             />
           );
         })}
@@ -118,7 +111,7 @@ const segmentPath = (
   ].join("");
 };
 
-const segment = (n: number, fill: Color) => {
+const segment = (n: number) => {
   const center = SVG_SIZE / 2;
   const degrees = 360 / SEGMENTS;
   const start = degrees * n;

@@ -148,7 +148,11 @@ function ColorGridMinigame() {
 function GridCell(props) {
   return (
     <div
-      style={{ backgroundColor: props.color, width: "50px", height: "50px" }}
+      style={{
+        backgroundColor: getHexColor(props.color),
+        width: "50px",
+        height: "50px",
+      }}
       onClick={() => props.onClick(props.i, props.j)}
     />
   );
@@ -158,7 +162,7 @@ function GridColorControl(props) {
   return (
     <div
       style={{
-        backgroundColor: props.color,
+        backgroundColor: getHexColor(props.color),
         margin: "4px",
         width: "35px",
         height: "35px",
@@ -258,6 +262,13 @@ function getRandomColor() {
   if (rand <= 0.33) return "red";
   if (rand <= 0.66) return "green";
   return "blue";
+}
+
+function getHexColor(colorString) {
+  if (colorString === "red") return "#BD2322";
+  if (colorString === "green") return "#789E48";
+  if (colorString === "blue") return "#4A83A5";
+  return "transparent";
 }
 
 export default ColorGridMinigame;

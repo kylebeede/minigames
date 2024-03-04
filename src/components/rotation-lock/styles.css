@@ -1,7 +1,7 @@
 .circle-track {
   position: relative;
-  width: 100px;
-  height: 100px;
+  /* width: 100px; */
+  /* height: 100px; */
   border-radius: 50%;
   border: 2px solid #788790;
   margin: 0 auto;
@@ -74,8 +74,6 @@
 
 .svg-key {
   position: absolute;
-  width: 150px;
-  height: 150px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -98,4 +96,14 @@
   /* border-top-color: #ffc106; */
   fill: #ffc106;
   path: #ffc106;
+}
+
+.lock-layer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

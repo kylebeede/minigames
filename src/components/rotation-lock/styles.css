@@ -64,6 +64,10 @@
   background-color: #ffc106;
 }
 
+.passed .circle {
+  background-color: rgb(16 162 134 / 80%);
+}
+
 .key-svg {
   position: absolute;
   width: 100%;
@@ -96,6 +100,11 @@
   /* border-top-color: #ffc106; */
   fill: #ffc106;
   path: #ffc106;
+}
+
+.passed .key {
+  fill: rgb(16 162 134 / 80%);
+  path: rgb(16 162 134 / 80%);
 }
 
 .lock-layer {

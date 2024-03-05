@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
+import { App } from "antd";
 import { segment } from "./circle-segment-generator";
 import "./styles.css";
 
@@ -8,52 +9,143 @@ interface Data {
 }
 
 type Color = "blue" | "red" | "yellow";
+type LayerStatus = "active" | "inactive" | "failed" | "passed";
+
+const LAYER_COUNT = 4;
 
 export function RotationLock() {
+  const [activeLayer, setActiveLayer] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const [layerStatuses, setLayerStatuses] = useState<LayerStatus[]>([
+    "active",
+    ...new Array(LAYER_COUNT - 1).fill("inactive"),
+  ]);
+
+  const { message } = App.useApp();
+
+  const handleResult = useCallback(
+    (isCorrect: boolean) => {
+      if (isCorrect) {
+        message.success("Correct!");
+        if (activeLayer === LAYER_COUNT - 1) {
+          message.success("You've unlocked the lock!");
+        }
+
+        const updatedLayerStatuses = [...layerStatuses];
+        updatedLayerStatuses[activeLayer] = "passed";
+
+        if (activeLayer < LAYER_COUNT - 1) {
+          updatedLayerStatuses[activeLayer + 1] = "active";
+        }
+        setLayerStatuses(updatedLayerStatuses);
+        setActiveLayer(Math.min(activeLayer + 1, LAYER_COUNT - 1));
+      } else {
+        message.error("Failed");
+        setFailed(true);
+        setActiveLayer(0);
+      }
+    },
+    [activeLayer, layerStatuses, message]
+  );
+
   return (
     <div className="container">
       <DegreeGuides />
       <LockLayer
+        status={layerStatuses[0]}
         keyMin={4}
         keyMax={7}
         circleMin={9}
         circleMax={11}
         trackSize={100}
+        handleResult={handleResult}
       />
 
       <LockLayer
+        status={layerStatuses[1]}
         keyMin={4}
         keyMax={7}
         circleMin={9}
         circleMax={11}
         trackSize={200}
+        handleResult={handleResult}
+      />
+
+      <LockLayer
+        status={layerStatuses[2]}
+        keyMin={4}
+        keyMax={7}
+        circleMin={9}
+        circleMax={11}
+        trackSize={300}
+        handleResult={handleResult}
+      />
+
+      <LockLayer
+        status={layerStatuses[3]}
+        keyMin={4}
+        keyMax={7}
+        circleMin={9}
+        circleMax={11}
+        trackSize={400}
+        handleResult={handleResult}
       />
     </div>
   );
 }
 
 interface LockLayerProps {
+  status: LayerStatus;
   keyMin: number;
   keyMax: number;
   circleMin: number;
   circleMax: number;
   trackSize: number;
+  handleResult: (isCorrect: boolean) => void;
 }
 function LockLayer(props: LockLayerProps) {
   const [rotation, setRotation] = useState(0);
   const [circleData, setCircleData] = useState<Data[]>([]);
   const [keyData, setKeyData] = useState<Data[]>([]);
 
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (props.status !== "active") return;
+
+      if (e.key === "ArrowLeft") {
+        setRotation((prevRotation) => prevRotation - 30);
+      } else if (e.key === "ArrowRight") {
+        setRotation((prevRotation) => prevRotation + 30);
+      } else if (e.key === "Enter") {
+        let isCorrect = true;
+        // check if circles are aligned with keys
+        const circleMap = new Map<number, Color>();
+        circleData.forEach((circle) => {
+          let adjustedLocation = circle.location + rotation;
+          while (adjustedLocation < 0) adjustedLocation += 360;
+          circleMap.set(adjustedLocation % 360, circle.color);
+        });
+
+        keyData.forEach((key) => {
+          const keyLocation = key.location;
+          const circleColor = circleMap.get(keyLocation);
+          if (!circleColor || circleColor !== key.color) {
+            isCorrect = false;
+          }
+        });
+
+        props.handleResult(isCorrect);
+      }
+    },
+    [circleData, keyData, props, rotation]
+  );
+
+  // Generate key and circle data
   useEffect(() => {
-    // TODO: # of keys and circles should be random
-
-    // generate random key data
     const occupiedLocations = new Set();
-
     const keyCount =
       Math.floor(Math.random() * (props.keyMax - props.keyMin + 1)) +
       props.keyMin;
-    console.log(keyCount);
     const generatedKeyData = Array.from({ length: keyCount }, () => {
       let location = Math.floor(Math.random() * 12) * 30;
       while (occupiedLocations.has(location)) {
@@ -94,25 +186,19 @@ function LockLayer(props: LockLayerProps) {
 
     setKeyData(generatedKeyData);
     setCircleData(generatedCircleData);
+  }, [props.circleMax, props.keyMax, props.keyMin]);
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") {
-        setRotation((prevRotation) => prevRotation - 30);
-      } else if (event.key === "ArrowRight") {
-        setRotation((prevRotation) => prevRotation + 30);
-      }
-    };
-
+  useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [props.circleMax, props.keyMax, props.keyMin]);
+  }, [handleKeyDown, props.circleMax, props.keyMax, props.keyMin]);
 
   return (
     <div
-      className="lock-layer"
+      className={`lock-layer ${props.status}`}
       style={{
         width: `${props.trackSize + 50}px`,
         height: `${props.trackSize + 50}px`,

@@ -15,7 +15,7 @@ const LAYER_COUNT = 4;
 
 export function RotationLock() {
   const [activeLayer, setActiveLayer] = useState(0);
-  const [failed, setFailed] = useState(false);
+  const [, setFailed] = useState(false);
   const [layerStatuses, setLayerStatuses] = useState<LayerStatus[]>([
     "active",
     ...new Array(LAYER_COUNT - 1).fill("inactive"),

@@ -54,11 +54,12 @@ export function RotationLock() {
 
   const handleRotation = useCallback(
     (rotation: number) => {
+      if (layerStatuses[activeLayer] !== "active") return;
       const updatedLayerRotations = [...layerRotations];
       updatedLayerRotations[activeLayer] += rotation;
       setLayerRotations(updatedLayerRotations);
     },
-    [activeLayer, layerRotations]
+    [activeLayer, layerRotations, layerStatuses]
   );
 
   return (

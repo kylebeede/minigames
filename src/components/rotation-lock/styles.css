@@ -20,7 +20,6 @@
 
 .guide {
   width: 2px;
-  height: 300px;
   background-color: #788790;
   position: absolute;
   top: 50%;
@@ -115,4 +114,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.rotate-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
 }

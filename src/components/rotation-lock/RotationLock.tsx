@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from "react";
-import { App } from "antd";
+import { App, Button } from "antd";
 import { segment } from "./circle-segment-generator";
 import "./styles.css";
 
@@ -20,6 +20,10 @@ export function RotationLock() {
     "active",
     ...new Array(LAYER_COUNT - 1).fill("inactive"),
   ]);
+
+  const [layerRotations, setLayerRotations] = useState<number[]>(
+    new Array(LAYER_COUNT).fill(0)
+  );
 
   const { message } = App.useApp();
 
@@ -48,63 +52,113 @@ export function RotationLock() {
     [activeLayer, layerStatuses, message]
   );
 
+  const handleRotation = useCallback(
+    (rotation: number) => {
+      const updatedLayerRotations = [...layerRotations];
+      updatedLayerRotations[activeLayer] += rotation;
+      setLayerRotations(updatedLayerRotations);
+    },
+    [activeLayer, layerRotations]
+  );
+
   return (
-    <div className="container">
+    <div
+      className="container"
+      style={{
+        width: `${LAYER_COUNT * 100 + 50}px`,
+        height: `${LAYER_COUNT * 100 + 50}px`,
+      }}
+    >
       <DegreeGuides />
-      <LockLayer
-        status={layerStatuses[0]}
-        keyMin={4}
-        keyMax={7}
-        circleMin={9}
-        circleMax={11}
-        trackSize={100}
-        handleResult={handleResult}
-      />
+      <div
+        className="lock-container"
+        style={{
+          width: `${LAYER_COUNT * 100 + 50}px`,
+          height: `${LAYER_COUNT * 100 + 50}px`,
+        }}
+      >
+        <LockLayer
+          status={layerStatuses[0]}
+          rotation={layerRotations[0]}
+          keyMin={4}
+          keyMax={7}
+          circleMin={9}
+          circleMax={11}
+          trackSize={100}
+          handleResult={handleResult}
+          handleRotation={handleRotation}
+        />
 
-      <LockLayer
-        status={layerStatuses[1]}
-        keyMin={4}
-        keyMax={7}
-        circleMin={9}
-        circleMax={11}
-        trackSize={200}
-        handleResult={handleResult}
-      />
+        <LockLayer
+          status={layerStatuses[1]}
+          rotation={layerRotations[1]}
+          keyMin={4}
+          keyMax={7}
+          circleMin={9}
+          circleMax={11}
+          trackSize={200}
+          handleResult={handleResult}
+          handleRotation={handleRotation}
+        />
 
-      <LockLayer
-        status={layerStatuses[2]}
-        keyMin={4}
-        keyMax={7}
-        circleMin={9}
-        circleMax={11}
-        trackSize={300}
-        handleResult={handleResult}
-      />
+        <LockLayer
+          status={layerStatuses[2]}
+          rotation={layerRotations[2]}
+          keyMin={4}
+          keyMax={7}
+          circleMin={9}
+          circleMax={11}
+          trackSize={300}
+          handleResult={handleResult}
+          handleRotation={handleRotation}
+        />
 
-      <LockLayer
-        status={layerStatuses[3]}
-        keyMin={4}
-        keyMax={7}
-        circleMin={9}
-        circleMax={11}
-        trackSize={400}
-        handleResult={handleResult}
-      />
+        <LockLayer
+          status={layerStatuses[3]}
+          rotation={layerRotations[3]}
+          keyMin={4}
+          keyMax={7}
+          circleMin={9}
+          circleMax={11}
+          trackSize={400}
+          handleResult={handleResult}
+          handleRotation={handleRotation}
+        />
+      </div>
+
+      <div className="rotate-button-container">
+        <Button
+          type="primary"
+          onClick={() => handleRotation(-30)}
+          style={{ display: "flex", marginRight: "8px" }}
+        >
+          Rotate left
+        </Button>
+
+        <Button
+          type="primary"
+          onClick={() => handleRotation(30)}
+          style={{ display: "flex", marginRight: "8px" }}
+        >
+          Rotate right
+        </Button>
+      </div>
     </div>
   );
 }
 
 interface LockLayerProps {
   status: LayerStatus;
+  rotation: number;
   keyMin: number;
   keyMax: number;
   circleMin: number;
   circleMax: number;
   trackSize: number;
   handleResult: (isCorrect: boolean) => void;
+  handleRotation: (rotation: number) => void;
 }
 function LockLayer(props: LockLayerProps) {
-  const [rotation, setRotation] = useState(0);
   const [circleData, setCircleData] = useState<Data[]>([]);
   const [keyData, setKeyData] = useState<Data[]>([]);
 
@@ -113,15 +167,15 @@ function LockLayer(props: LockLayerProps) {
       if (props.status !== "active") return;
 
       if (e.key === "ArrowLeft") {
-        setRotation((prevRotation) => prevRotation - 30);
+        props.handleRotation(-30);
       } else if (e.key === "ArrowRight") {
-        setRotation((prevRotation) => prevRotation + 30);
-      } else if (e.key === "Enter") {
+        props.handleRotation(30);
+      } else if (e.key === "Enter" || e.key === " ") {
         let isCorrect = true;
         // check if circles are aligned with keys
         const circleMap = new Map<number, Color>();
         circleData.forEach((circle) => {
-          let adjustedLocation = circle.location + rotation;
+          let adjustedLocation = circle.location + props.rotation;
           while (adjustedLocation < 0) adjustedLocation += 360;
           circleMap.set(adjustedLocation % 360, circle.color);
         });
@@ -137,7 +191,7 @@ function LockLayer(props: LockLayerProps) {
         props.handleResult(isCorrect);
       }
     },
-    [circleData, keyData, props, rotation]
+    [props, circleData, keyData]
   );
 
   // Generate key and circle data
@@ -225,7 +279,7 @@ function LockLayer(props: LockLayerProps) {
       <div
         className="circle-track"
         style={{
-          transform: `rotate(${rotation}deg)`,
+          transform: `rotate(${props.rotation}deg)`,
           width: `${props.trackSize}px`,
           height: `${props.trackSize}px`,
         }}
@@ -251,12 +305,12 @@ function LockLayer(props: LockLayerProps) {
 function DegreeGuides() {
   return (
     <>
-      <div className="guide" />
-      <div className="guide" />
-      <div className="guide" />
-      <div className="guide" />
-      <div className="guide" />
-      <div className="guide" />
+      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
+      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
+      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
+      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
+      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
+      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
     </>
   );
 }

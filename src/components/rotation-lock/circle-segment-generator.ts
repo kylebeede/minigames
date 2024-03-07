@@ -1,3 +1,4 @@
+// https://observablehq.com/@haakenlid/svg-circle
 const polarToCartesian = (x: number, y: number, r: number, degrees: number) => {
   const radians = (degrees * Math.PI) / 180.0;
   return [x + r * Math.cos(radians), y + r * Math.sin(radians)];
@@ -44,9 +45,7 @@ export const segment = (n: number, size: number) => {
   return path;
 };
 
-// const SVG_SIZE = 150;
 const SEGMENTS = 12;
 const MARGIN = 0;
-// const RADIUS = 75;
 const WIDTH = 4;
 const OFFSET = -0.5;

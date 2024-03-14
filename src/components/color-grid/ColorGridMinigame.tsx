@@ -5,27 +5,35 @@ import {
   StepBackwardOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
+import { Timer } from "../shared";
 const { Title } = Typography;
 
 type Color = "green" | "blue" | "red" | "transparent";
+type GameStatus = "active" | "ended";
 const DEFAULT_HEIGHT = 8;
 const DEFAULT_WIDTH = 11;
 
 function ColorGridMinigame() {
+  const [gameStatus, setGameStatus] = useState<GameStatus>("active");
   const [gridHistory, setGridHistory] = useState<Color[][][]>([
     calculateGrid(DEFAULT_HEIGHT, DEFAULT_WIDTH),
   ]);
+
+  const [showControlPanel, setShowControlPanel] = useState(false);
   const [height, setHeight] = useState(8);
   const [width, setWidth] = useState(11);
   const [selectedGridColor, setSelectedGridColor] = useState<Color | null>(
     null
   );
-  const [showControlPanel, setShowControlPanel] = useState(false);
+
+  const [timerKey, setTimerKey] = useState(crypto.randomUUID());
+  const [timerDuration, setTimerDuration] = useState(30);
 
   const { message } = App.useApp();
 
   const handleCellClick = useCallback(
     (colIndex: number, rowIndex: number) => {
+      if (gameStatus === "ended") return;
       const latestGrid = gridHistory[gridHistory.length - 1];
       const newGrid = latestGrid.map((arr) => arr.slice());
       if (selectedGridColor) {
@@ -50,15 +58,20 @@ function ColorGridMinigame() {
             }
           }
         }
-        if (!hasElementsLeft) message.success("You win!");
+        if (!hasElementsLeft) {
+          message.success("You win!");
+          setGameStatus("ended");
+        }
       }
       setGridHistory([...gridHistory, newGrid]);
     },
-    [gridHistory, selectedGridColor, height, width, message]
+    [gameStatus, gridHistory, selectedGridColor, height, width, message]
   );
 
   const handleGridReset = useCallback(() => {
     setGridHistory([calculateGrid(height, width)]);
+    setGameStatus("active");
+    setTimerKey(crypto.randomUUID());
   }, [height, width]);
 
   const gridComponents: React.ReactNode[] = useMemo(() => {
@@ -91,16 +104,18 @@ function ColorGridMinigame() {
   );
 
   const handleGridUndo = useCallback(() => {
-    if (gridHistory.length === 1) return;
+    if (gridHistory.length === 1 || gameStatus === "ended") return;
     const newGridHistory = gridHistory.slice(0, -1);
     setGridHistory(newGridHistory);
-  }, [gridHistory, setGridHistory]);
+  }, [gameStatus, gridHistory]);
 
   const handleGridHeightChange = useCallback(
     (height: number | null) => {
       if (height === null) return;
       setHeight(height);
       setGridHistory([calculateGrid(height, width)]);
+      setGameStatus("active");
+      setTimerKey(crypto.randomUUID());
     },
     [width]
   );
@@ -110,6 +125,7 @@ function ColorGridMinigame() {
       if (width === null) return;
       setWidth(width);
       setGridHistory([calculateGrid(height, width)]);
+      setGameStatus("active");
     },
     [height]
   );
@@ -117,6 +133,17 @@ function ColorGridMinigame() {
   const toggleControlPanel = useCallback(() => {
     setShowControlPanel((prev) => !prev);
   }, []);
+
+  const handleSetTimerDuration = useCallback((duration: number | null) => {
+    if (duration === null) return;
+    setTimerDuration(duration);
+    setTimerKey(crypto.randomUUID());
+  }, []);
+
+  const handleTimerEnd = useCallback(() => {
+    message.error("You lose.");
+    setGameStatus("ended");
+  }, [message]);
 
   return (
     <div
@@ -143,6 +170,12 @@ function ColorGridMinigame() {
       >
         {gridComponents}
       </div>
+      <Timer
+        key={timerKey}
+        duration={timerDuration}
+        onTimerEnd={handleTimerEnd}
+        isCompleted={gameStatus === "ended"}
+      />
       {!showControlPanel ? null : (
         <div
           className="control-panel"
@@ -237,6 +270,26 @@ function ColorGridMinigame() {
                 value={width}
               />
             </div>
+          </div>
+
+          <div>
+            <Title
+              level={5}
+              style={{
+                margin: "0",
+                color: "#FFF",
+                display: "block",
+              }}
+            >
+              {"Timer"}
+            </Title>
+            <InputNumber
+              min={10}
+              max={1000}
+              defaultValue={30}
+              onChange={handleSetTimerDuration}
+              value={timerDuration}
+            />
           </div>
         </div>
       )}

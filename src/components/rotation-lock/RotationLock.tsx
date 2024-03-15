@@ -1,6 +1,18 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { App, Button } from "antd";
+import {
+  App,
+  Button,
+  Checkbox,
+  FloatButton,
+  InputNumber,
+  Typography,
+} from "antd";
+import { SettingOutlined, UndoOutlined } from "@ant-design/icons";
+import type { CheckboxProps } from "antd";
+import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { segment } from "./circle-segment-generator";
+import { Timer } from "../shared";
+const { Title } = Typography;
 import "./styles.css";
 
 interface Data {
@@ -15,11 +27,18 @@ const LAYER_COUNT = 4;
 
 export function RotationLock() {
   const [activeLayer, setActiveLayer] = useState(0);
-  const [, setFailed] = useState(false);
   const [layerStatuses, setLayerStatuses] = useState<LayerStatus[]>([
     "active",
     ...new Array(LAYER_COUNT - 1).fill("inactive"),
   ]);
+
+  const [timerKey, setTimerKey] = useState(crypto.randomUUID());
+  const [timerDuration, setTimerDuration] = useState(20);
+  const [timerEnabled, setTimerEnabled] = useState(true);
+
+  const [gameKey, setGameKey] = useState(crypto.randomUUID());
+
+  const [showControlPanel, setShowControlPanel] = useState(false);
 
   const { keyData, circleData } = useMemo(
     () =>
@@ -76,7 +95,6 @@ export function RotationLock() {
         setActiveLayer(Math.min(activeLayer + 1, LAYER_COUNT - 1));
       } else {
         message.error("Failed");
-        setFailed(true);
         setActiveLayer(0);
       }
     },
@@ -133,6 +151,44 @@ export function RotationLock() {
     [activeLayer, handleRotation, handleUnlock, layerStatuses]
   );
 
+  const handleTimerEnd = useCallback(() => {
+    setLayerStatuses((prevLayerStatuses) => {
+      const newLayerStatuses = prevLayerStatuses.map((status) =>
+        status === "passed" ? "passed" : "failed"
+      );
+
+      return newLayerStatuses;
+    });
+    message.error("You lose");
+  }, [message]);
+
+  const toggleControlPanel = useCallback(() => {
+    setShowControlPanel((prev) => !prev);
+  }, []);
+
+  const handleSetTimerDuration = useCallback((duration: number | null) => {
+    if (duration === null) return;
+    setTimerDuration(duration);
+    setTimerKey(crypto.randomUUID());
+  }, []);
+
+  const handleTimerToggle: CheckboxProps["onChange"] = useCallback(
+    (e: CheckboxChangeEvent) => {
+      setTimerEnabled(e.target.checked);
+    },
+    []
+  );
+
+  const handleReset = useCallback(() => {
+    setGameKey(crypto.randomUUID());
+    setTimerKey(crypto.randomUUID());
+    setActiveLayer(0);
+    setLayerStatuses([
+      "active",
+      ...new Array(LAYER_COUNT - 1).fill("inactive"),
+    ]);
+  }, []);
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
 
@@ -141,75 +197,160 @@ export function RotationLock() {
     };
   }, [handleKeyDown]);
 
+  const isGameOver = useMemo(
+    () =>
+      layerStatuses.some((status) => status === "failed") ||
+      layerStatuses.every((status) => status === "passed"),
+    [layerStatuses]
+  );
+
   return (
-    <div
-      className="container"
-      style={{
-        width: `${LAYER_COUNT * 100 + 50}px`,
-        height: `${LAYER_COUNT * 100 + 50}px`,
-      }}
-    >
-      <DegreeGuides />
+    <>
       <div
-        className="lock-container"
+        className="container"
         style={{
           width: `${LAYER_COUNT * 100 + 50}px`,
           height: `${LAYER_COUNT * 100 + 50}px`,
         }}
       >
-        <LockLayer
-          status={layerStatuses[0]}
-          rotation={layerRotations[0]}
-          keyData={keyData[0]}
-          circleData={circleData[0]}
-          trackSize={100}
-        />
-
-        <LockLayer
-          status={layerStatuses[1]}
-          rotation={layerRotations[1]}
-          keyData={keyData[1]}
-          circleData={circleData[1]}
-          trackSize={200}
-        />
-
-        <LockLayer
-          status={layerStatuses[2]}
-          rotation={layerRotations[2]}
-          keyData={keyData[2]}
-          circleData={circleData[2]}
-          trackSize={300}
-        />
-
-        <LockLayer
-          status={layerStatuses[3]}
-          rotation={layerRotations[3]}
-          keyData={keyData[3]}
-          circleData={circleData[3]}
-          trackSize={400}
-        />
-      </div>
-
-      <div className="rotate-button-container">
-        <Button
-          type="primary"
-          onClick={() => handleRotation(-30)}
-          style={{ marginRight: "8px" }}
-          block
+        <DegreeGuides />
+        <div
+          className={`lock-container ${isGameOver ? "game-over" : ""}`}
+          style={{
+            width: `${LAYER_COUNT * 100 + 50}px`,
+            height: `${LAYER_COUNT * 100 + 50}px`,
+          }}
         >
-          Rotate left
-        </Button>
+          <LockLayer
+            key={`${gameKey}-0`}
+            status={layerStatuses[0]}
+            rotation={layerRotations[0]}
+            keyData={keyData[0]}
+            circleData={circleData[0]}
+            trackSize={100}
+          />
 
-        <Button type="primary" onClick={() => handleRotation(30)} block>
-          Rotate right
-        </Button>
+          <LockLayer
+            key={`${gameKey}-1`}
+            status={layerStatuses[1]}
+            rotation={layerRotations[1]}
+            keyData={keyData[1]}
+            circleData={circleData[1]}
+            trackSize={200}
+          />
+
+          <LockLayer
+            key={`${gameKey}-2`}
+            status={layerStatuses[2]}
+            rotation={layerRotations[2]}
+            keyData={keyData[2]}
+            circleData={circleData[2]}
+            trackSize={300}
+          />
+
+          <LockLayer
+            key={`${gameKey}-3`}
+            status={layerStatuses[3]}
+            rotation={layerRotations[3]}
+            keyData={keyData[3]}
+            circleData={circleData[3]}
+            trackSize={400}
+          />
+        </div>
+
+        <div className="rotate-button-container">
+          <Button
+            type="primary"
+            onClick={() => handleRotation(-30)}
+            style={{ marginRight: "8px" }}
+            block
+            disabled={isGameOver}
+          >
+            Rotate left
+          </Button>
+
+          <Button
+            type="primary"
+            onClick={() => handleRotation(30)}
+            block
+            disabled={isGameOver}
+          >
+            Rotate right
+          </Button>
+        </div>
+        <div>
+          <Button
+            type="primary"
+            onClick={handleUnlock}
+            block
+            disabled={isGameOver}
+          >
+            Unlock
+          </Button>
+        </div>
+
+        {!timerEnabled ? null : (
+          <Timer
+            key={timerKey}
+            duration={timerDuration}
+            onTimerEnd={handleTimerEnd}
+            isCompleted={isGameOver}
+          />
+        )}
       </div>
-      <div>
-        <Button type="primary" onClick={handleUnlock} block>
-          Unlock
-        </Button>
-      </div>
-    </div>
+      {!showControlPanel ? null : (
+        <div
+          className="control-panel"
+          style={{
+            position: "absolute",
+            right: "16px",
+            border: "1px solid white",
+            padding: "12px",
+            bottom: "110px",
+            backgroundColor: "rgb(6, 18, 33)",
+          }}
+        >
+          <div>
+            <Title
+              level={5}
+              style={{
+                margin: "0",
+                color: "#FFF",
+                display: "block",
+              }}
+            >
+              {"Timer"}
+            </Title>
+            <div>
+              <Checkbox checked={timerEnabled} onChange={handleTimerToggle}>
+                <InputNumber
+                  min={10}
+                  max={1000}
+                  defaultValue={20}
+                  onChange={handleSetTimerDuration}
+                  value={timerDuration}
+                  disabled={!timerEnabled}
+                />
+              </Checkbox>
+            </div>
+          </div>
+        </div>
+      )}
+      <FloatButton
+        icon={<SettingOutlined />}
+        type="primary"
+        tooltip={<div>Settings</div>}
+        onClick={toggleControlPanel}
+        style={{ right: 24 }}
+      />
+      <FloatButton
+        icon={<UndoOutlined />}
+        type="primary"
+        tooltip={<div>Reset</div>}
+        onClick={handleReset}
+        style={{ right: 80 }}
+      />
+    </>
   );
 }
 

@@ -106,6 +106,15 @@
   path: rgb(16 162 134 / 80%);
 }
 
+.game-over div.lock-layer:not(.passed) .key {
+  fill: rgb(225 10 43 / 80%);
+  path: rgb(225 10 43 / 80%);
+}
+
+.game-over div.lock-layer:not(.passed) .circle {
+  background-color: rgb(225 10 43 / 80%);
+}
+
 .lock-layer {
   position: absolute;
   top: 50%;

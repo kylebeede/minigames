@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo } from "react";
-import { App, Typography, InputNumber, FloatButton } from "antd";
+import { App, Typography, InputNumber, FloatButton, Checkbox } from "antd";
 import {
   SettingOutlined,
   StepBackwardOutlined,
@@ -7,6 +7,8 @@ import {
 } from "@ant-design/icons";
 import { Timer } from "../shared";
 const { Title } = Typography;
+import type { CheckboxProps } from "antd";
+import { CheckboxChangeEvent } from "antd/es/checkbox";
 
 type Color = "green" | "blue" | "red" | "transparent";
 type GameStatus = "active" | "ended";
@@ -28,6 +30,7 @@ function ColorGridMinigame() {
 
   const [timerKey, setTimerKey] = useState(crypto.randomUUID());
   const [timerDuration, setTimerDuration] = useState(30);
+  const [timerEnabled, setTimerEnabled] = useState(true);
 
   const { message } = App.useApp();
 
@@ -145,6 +148,13 @@ function ColorGridMinigame() {
     setGameStatus("ended");
   }, [message]);
 
+  const handleTimerToggle: CheckboxProps["onChange"] = useCallback(
+    (e: CheckboxChangeEvent) => {
+      setTimerEnabled(e.target.checked);
+    },
+    []
+  );
+
   return (
     <div
       className="colorGrid"
@@ -170,12 +180,14 @@ function ColorGridMinigame() {
       >
         {gridComponents}
       </div>
-      <Timer
-        key={timerKey}
-        duration={timerDuration}
-        onTimerEnd={handleTimerEnd}
-        isCompleted={gameStatus === "ended"}
-      />
+      {!timerEnabled ? null : (
+        <Timer
+          key={timerKey}
+          duration={timerDuration}
+          onTimerEnd={handleTimerEnd}
+          isCompleted={gameStatus === "ended"}
+        />
+      )}
       {!showControlPanel ? null : (
         <div
           className="control-panel"
@@ -276,20 +288,25 @@ function ColorGridMinigame() {
             <Title
               level={5}
               style={{
-                margin: "0",
+                margin: "8px 0 0 0",
                 color: "#FFF",
                 display: "block",
               }}
             >
               {"Timer"}
             </Title>
-            <InputNumber
-              min={10}
-              max={1000}
-              defaultValue={30}
-              onChange={handleSetTimerDuration}
-              value={timerDuration}
-            />
+            <div>
+              <Checkbox checked={timerEnabled} onChange={handleTimerToggle}>
+                <InputNumber
+                  min={10}
+                  max={1000}
+                  defaultValue={30}
+                  onChange={handleSetTimerDuration}
+                  value={timerDuration}
+                  disabled={!timerEnabled}
+                />
+              </Checkbox>
+            </div>
           </div>
         </div>
       )}

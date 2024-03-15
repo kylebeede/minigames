@@ -40,36 +40,35 @@ export function RotationLock() {
 
   const [showControlPanel, setShowControlPanel] = useState(false);
 
-  const { keyData, circleData } = useMemo(
-    () =>
-      generateLockData([
-        {
-          keyMin: 4,
-          keyMax: 7,
-          circleMin: 9,
-          circleMax: 11,
-        },
-        {
-          keyMin: 4,
-          keyMax: 7,
-          circleMin: 9,
-          circleMax: 11,
-        },
-        {
-          keyMin: 4,
-          keyMax: 7,
-          circleMin: 9,
-          circleMax: 11,
-        },
-        {
-          keyMin: 4,
-          keyMax: 7,
-          circleMin: 9,
-          circleMax: 11,
-        },
-      ]),
-    []
+  const [lockData, setLockData] = useState(
+    generateLockData([
+      {
+        keyMin: 4,
+        keyMax: 7,
+        circleMin: 9,
+        circleMax: 11,
+      },
+      {
+        keyMin: 4,
+        keyMax: 7,
+        circleMin: 9,
+        circleMax: 11,
+      },
+      {
+        keyMin: 4,
+        keyMax: 7,
+        circleMin: 9,
+        circleMax: 11,
+      },
+      {
+        keyMin: 4,
+        keyMax: 7,
+        circleMin: 9,
+        circleMax: 11,
+      },
+    ])
   );
+  const { keyData, circleData } = lockData;
 
   const [layerRotations, setLayerRotations] = useState<number[]>(
     new Array(LAYER_COUNT).fill(0)
@@ -187,6 +186,34 @@ export function RotationLock() {
       "active",
       ...new Array(LAYER_COUNT - 1).fill("inactive"),
     ]);
+    setLockData(
+      generateLockData([
+        {
+          keyMin: 4,
+          keyMax: 7,
+          circleMin: 9,
+          circleMax: 11,
+        },
+        {
+          keyMin: 4,
+          keyMax: 7,
+          circleMin: 9,
+          circleMax: 11,
+        },
+        {
+          keyMin: 4,
+          keyMax: 7,
+          circleMin: 9,
+          circleMax: 11,
+        },
+        {
+          keyMin: 4,
+          keyMax: 7,
+          circleMin: 9,
+          circleMax: 11,
+        },
+      ])
+    );
   }, []);
 
   useEffect(() => {

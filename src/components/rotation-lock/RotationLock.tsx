@@ -331,16 +331,19 @@ export function RotationLock() {
               {"Timer"}
             </Title>
             <div>
-              <Checkbox checked={timerEnabled} onChange={handleTimerToggle}>
-                <InputNumber
-                  min={10}
-                  max={1000}
-                  defaultValue={20}
-                  onChange={handleSetTimerDuration}
-                  value={timerDuration}
-                  disabled={!timerEnabled}
-                />
-              </Checkbox>
+              <Checkbox checked={timerEnabled} onChange={handleTimerToggle} />
+              <InputNumber
+                min={10}
+                max={1000}
+                defaultValue={20}
+                onChange={handleSetTimerDuration}
+                value={timerDuration}
+                disabled={!timerEnabled}
+                style={{
+                  width: "65px",
+                  marginLeft: "8px",
+                }}
+              />
             </div>
           </div>
         </div>

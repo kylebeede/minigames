@@ -32,11 +32,12 @@ function QuickType() {
     (e: KeyboardEvent) => {
       if (gameStatus !== "active") return;
       if (e.key.toLowerCase() !== code[activeIndex].toLowerCase()) {
+        message.error("You lose.");
         setGameStatus("failed");
       } else {
         if (activeIndex === code.length - 1) {
-          setGameStatus("passed");
           message.success("You win!");
+          setGameStatus("passed");
         }
         setActiveIndex((prevIndex) => prevIndex + 1);
       }
@@ -193,16 +194,19 @@ function QuickType() {
               {"Timer"}
             </Title>
             <div>
-              <Checkbox checked={timerEnabled} onChange={handleTimerToggle}>
-                <InputNumber
-                  min={10}
-                  max={1000}
-                  defaultValue={30}
-                  onChange={handleSetTimerDuration}
-                  value={timerDuration}
-                  disabled={!timerEnabled}
-                />
-              </Checkbox>
+              <Checkbox checked={timerEnabled} onChange={handleTimerToggle} />
+              <InputNumber
+                min={5}
+                max={1000}
+                defaultValue={7}
+                onChange={handleSetTimerDuration}
+                value={timerDuration}
+                disabled={!timerEnabled}
+                style={{
+                  width: "65px",
+                  marginLeft: "8px",
+                }}
+              />
             </div>
           </div>
         </div>

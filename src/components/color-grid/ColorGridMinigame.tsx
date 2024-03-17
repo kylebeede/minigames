@@ -25,7 +25,7 @@ function ColorGridMinigame() {
   const [height, setHeight] = useState(8);
   const [width, setWidth] = useState(11);
   const [selectedGridColor, setSelectedGridColor] = useState<Color | null>(
-    null
+    null,
   );
 
   const [timerKey, setTimerKey] = useState(crypto.randomUUID());
@@ -49,7 +49,7 @@ function ColorGridMinigame() {
           newGrid[rowIndex][colIndex],
           true,
           height,
-          width
+          width,
         );
         if (changed) reflowGrid(newGrid);
 
@@ -68,7 +68,7 @@ function ColorGridMinigame() {
       }
       setGridHistory([...gridHistory, newGrid]);
     },
-    [gameStatus, gridHistory, selectedGridColor, height, width, message]
+    [gameStatus, gridHistory, selectedGridColor, height, width, message],
   );
 
   const handleGridReset = useCallback(() => {
@@ -90,7 +90,7 @@ function ColorGridMinigame() {
               rowIndex={i}
               colIndex={j}
               onClick={handleCellClick}
-            />
+            />,
           );
         }
       }
@@ -103,7 +103,7 @@ function ColorGridMinigame() {
       if (selectedGridColor === color) setSelectedGridColor(null);
       else setSelectedGridColor(color);
     },
-    [selectedGridColor]
+    [selectedGridColor],
   );
 
   const handleGridUndo = useCallback(() => {
@@ -120,7 +120,7 @@ function ColorGridMinigame() {
       setGameStatus("active");
       setTimerKey(crypto.randomUUID());
     },
-    [width]
+    [width],
   );
 
   const handleGridWidthChange = useCallback(
@@ -130,7 +130,7 @@ function ColorGridMinigame() {
       setGridHistory([calculateGrid(height, width)]);
       setGameStatus("active");
     },
-    [height]
+    [height],
   );
 
   const toggleControlPanel = useCallback(() => {
@@ -152,7 +152,7 @@ function ColorGridMinigame() {
     (e: CheckboxChangeEvent) => {
       setTimerEnabled(e.target.checked);
     },
-    []
+    [],
   );
 
   return (
@@ -296,16 +296,19 @@ function ColorGridMinigame() {
               {"Timer"}
             </Title>
             <div>
-              <Checkbox checked={timerEnabled} onChange={handleTimerToggle}>
-                <InputNumber
-                  min={10}
-                  max={1000}
-                  defaultValue={30}
-                  onChange={handleSetTimerDuration}
-                  value={timerDuration}
-                  disabled={!timerEnabled}
-                />
-              </Checkbox>
+              <Checkbox checked={timerEnabled} onChange={handleTimerToggle} />
+              <InputNumber
+                min={10}
+                max={1000}
+                defaultValue={30}
+                onChange={handleSetTimerDuration}
+                value={timerDuration}
+                disabled={!timerEnabled}
+                style={{
+                  width: "65px",
+                  marginLeft: "8px",
+                }}
+              />
             </div>
           </div>
         </div>
@@ -395,7 +398,7 @@ function recalculateGrid(
   color: Color,
   first: boolean,
   height: number,
-  width: number
+  width: number,
 ) {
   const hasMatchingTop =
     rowIndex !== 0 && grid[rowIndex - 1][colIndex] === color;

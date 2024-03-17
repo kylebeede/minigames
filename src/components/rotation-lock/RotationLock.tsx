@@ -12,7 +12,7 @@ import type { CheckboxProps } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { segment } from "./circle-segment-generator";
 import { Timer } from "../shared";
-const { Title, Text } = Typography;
+const { Title } = Typography;
 import "./styles.css";
 
 interface Data {

@@ -23,13 +23,13 @@ interface Data {
 type Color = "blue" | "red" | "yellow";
 type LayerStatus = "active" | "inactive" | "failed" | "passed";
 
-const LAYER_COUNT = 4;
+const DEFAULT_LAYER_COUNT = 4;
 
 export function RotationLock() {
   const [activeLayer, setActiveLayer] = useState(0);
   const [layerStatuses, setLayerStatuses] = useState<LayerStatus[]>([
     "active",
-    ...new Array(LAYER_COUNT - 1).fill("inactive"),
+    ...new Array(DEFAULT_LAYER_COUNT - 1).fill("inactive"),
   ]);
 
   const [timerKey, setTimerKey] = useState(crypto.randomUUID());
@@ -39,39 +39,22 @@ export function RotationLock() {
   const [gameKey, setGameKey] = useState(crypto.randomUUID());
 
   const [showControlPanel, setShowControlPanel] = useState(false);
+  const [layerCount, setLayerCount] = useState(DEFAULT_LAYER_COUNT);
 
   const [lockData, setLockData] = useState(
-    generateLockData([
-      {
+    generateLockData(
+      Array.from({ length: DEFAULT_LAYER_COUNT }, () => ({
         keyMin: 4,
         keyMax: 7,
         circleMin: 9,
         circleMax: 11,
-      },
-      {
-        keyMin: 4,
-        keyMax: 7,
-        circleMin: 9,
-        circleMax: 11,
-      },
-      {
-        keyMin: 4,
-        keyMax: 7,
-        circleMin: 9,
-        circleMax: 11,
-      },
-      {
-        keyMin: 4,
-        keyMax: 7,
-        circleMin: 9,
-        circleMax: 11,
-      },
-    ])
+      })),
+    ),
   );
   const { keyData, circleData } = lockData;
 
   const [layerRotations, setLayerRotations] = useState<number[]>(
-    new Array(LAYER_COUNT).fill(0)
+    new Array(DEFAULT_LAYER_COUNT).fill(0),
   );
 
   const { message } = App.useApp();
@@ -79,25 +62,28 @@ export function RotationLock() {
   const handleResult = useCallback(
     (isCorrect: boolean) => {
       if (isCorrect) {
-        message.success("Correct!");
-        if (activeLayer === LAYER_COUNT - 1) {
+        if (activeLayer === layerCount - 1) {
           message.success("You've unlocked the lock!");
+        } else {
+          message.success("Correct!");
         }
 
         const updatedLayerStatuses = [...layerStatuses];
         updatedLayerStatuses[activeLayer] = "passed";
 
-        if (activeLayer < LAYER_COUNT - 1) {
+        if (activeLayer < layerCount - 1) {
           updatedLayerStatuses[activeLayer + 1] = "active";
         }
         setLayerStatuses(updatedLayerStatuses);
-        setActiveLayer(Math.min(activeLayer + 1, LAYER_COUNT - 1));
+        setActiveLayer(Math.min(activeLayer + 1, layerCount - 1));
       } else {
         message.error("Failed");
-        setActiveLayer(0);
+        const updatedLayerStatuses = [...layerStatuses];
+        updatedLayerStatuses[activeLayer] = "failed";
+        setLayerStatuses(updatedLayerStatuses);
       }
     },
-    [activeLayer, layerStatuses, message]
+    [activeLayer, layerCount, layerStatuses, message],
   );
 
   const handleRotation = useCallback(
@@ -107,7 +93,7 @@ export function RotationLock() {
       updatedLayerRotations[activeLayer] += rotation;
       setLayerRotations(updatedLayerRotations);
     },
-    [activeLayer, layerRotations, layerStatuses]
+    [activeLayer, layerRotations, layerStatuses],
   );
 
   const handleUnlock = useCallback(() => {
@@ -147,13 +133,13 @@ export function RotationLock() {
         handleUnlock();
       }
     },
-    [activeLayer, handleRotation, handleUnlock, layerStatuses]
+    [activeLayer, handleRotation, handleUnlock, layerStatuses],
   );
 
   const handleTimerEnd = useCallback(() => {
     setLayerStatuses((prevLayerStatuses) => {
       const newLayerStatuses = prevLayerStatuses.map((status) =>
-        status === "passed" ? "passed" : "failed"
+        status === "passed" ? "passed" : "failed",
       );
 
       return newLayerStatuses;
@@ -175,44 +161,44 @@ export function RotationLock() {
     (e: CheckboxChangeEvent) => {
       setTimerEnabled(e.target.checked);
     },
-    []
+    [],
   );
 
   const handleReset = useCallback(() => {
     setGameKey(crypto.randomUUID());
     setTimerKey(crypto.randomUUID());
     setActiveLayer(0);
-    setLayerStatuses([
-      "active",
-      ...new Array(LAYER_COUNT - 1).fill("inactive"),
-    ]);
+    setLayerStatuses(["active", ...new Array(layerCount).fill("inactive")]);
+    setLayerRotations(new Array(layerCount).fill(0));
     setLockData(
-      generateLockData([
-        {
+      generateLockData(
+        Array.from({ length: layerCount }, () => ({
           keyMin: 4,
           keyMax: 7,
           circleMin: 9,
           circleMax: 11,
-        },
-        {
+        })),
+      ),
+    );
+  }, [layerCount]);
+
+  const handleLayerCountChange = useCallback((newLayerCount: number | null) => {
+    if (newLayerCount === null) return;
+    setLayerCount(newLayerCount);
+    setGameKey(crypto.randomUUID());
+    setTimerKey(crypto.randomUUID());
+    setActiveLayer(0);
+    setLayerStatuses(["active", ...new Array(newLayerCount).fill("inactive")]);
+    setLayerRotations(new Array(newLayerCount).fill(0));
+    setLockData(
+      generateLockData(
+        Array.from({ length: newLayerCount }, () => ({
           keyMin: 4,
           keyMax: 7,
           circleMin: 9,
           circleMax: 11,
-        },
-        {
-          keyMin: 4,
-          keyMax: 7,
-          circleMin: 9,
-          circleMax: 11,
-        },
-        {
-          keyMin: 4,
-          keyMax: 7,
-          circleMin: 9,
-          circleMax: 11,
-        },
-      ])
+        })),
+      ),
     );
   }, []);
 
@@ -228,61 +214,38 @@ export function RotationLock() {
     () =>
       layerStatuses.some((status) => status === "failed") ||
       layerStatuses.every((status) => status === "passed"),
-    [layerStatuses]
+    [layerStatuses],
   );
+
+  const lockLayerComponents = Array.from({ length: layerCount }, (_, i) => (
+    <LockLayer
+      key={`${gameKey}-${i}`}
+      status={layerStatuses[i]}
+      rotation={layerRotations[i]}
+      keyData={keyData[i]}
+      circleData={circleData[i]}
+      trackSize={(i + 1) * 100}
+    />
+  ));
 
   return (
     <>
       <div
         className="container"
         style={{
-          width: `${LAYER_COUNT * 100 + 50}px`,
-          height: `${LAYER_COUNT * 100 + 50}px`,
+          width: `${layerCount * 100 + 50}px`,
+          height: `${layerCount * 100 + 50}px`,
         }}
       >
-        <DegreeGuides />
+        <DegreeGuides layerCount={layerCount} />
         <div
           className={`lock-container ${isGameOver ? "game-over" : ""}`}
           style={{
-            width: `${LAYER_COUNT * 100 + 50}px`,
-            height: `${LAYER_COUNT * 100 + 50}px`,
+            width: `${layerCount * 100 + 50}px`,
+            height: `${layerCount * 100 + 50}px`,
           }}
         >
-          <LockLayer
-            key={`${gameKey}-0`}
-            status={layerStatuses[0]}
-            rotation={layerRotations[0]}
-            keyData={keyData[0]}
-            circleData={circleData[0]}
-            trackSize={100}
-          />
-
-          <LockLayer
-            key={`${gameKey}-1`}
-            status={layerStatuses[1]}
-            rotation={layerRotations[1]}
-            keyData={keyData[1]}
-            circleData={circleData[1]}
-            trackSize={200}
-          />
-
-          <LockLayer
-            key={`${gameKey}-2`}
-            status={layerStatuses[2]}
-            rotation={layerRotations[2]}
-            keyData={keyData[2]}
-            circleData={circleData[2]}
-            trackSize={300}
-          />
-
-          <LockLayer
-            key={`${gameKey}-3`}
-            status={layerStatuses[3]}
-            rotation={layerRotations[3]}
-            keyData={keyData[3]}
-            circleData={circleData[3]}
-            trackSize={400}
-          />
+          {lockLayerComponents}
         </div>
 
         <div className="rotate-button-container">
@@ -337,6 +300,25 @@ export function RotationLock() {
             backgroundColor: "rgb(6, 18, 33)",
           }}
         >
+          <div>
+            <Title
+              level={5}
+              style={{
+                margin: "0",
+                color: "#FFF",
+                display: "block",
+              }}
+            >
+              {"Layer Count"}
+            </Title>
+            <InputNumber
+              min={2}
+              max={8}
+              defaultValue={4}
+              onChange={handleLayerCountChange}
+              value={layerCount}
+            />
+          </div>
           <div>
             <Title
               level={5}
@@ -441,15 +423,18 @@ function LockLayer(props: LockLayerProps) {
   );
 }
 
-function DegreeGuides() {
+interface DegreeGuidesProps {
+  layerCount: number;
+}
+function DegreeGuides({ layerCount }: DegreeGuidesProps) {
   return (
     <>
-      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
-      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
-      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
-      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
-      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
-      <div className="guide" style={{ height: `${LAYER_COUNT * 100}px` }} />
+      <div className="guide" style={{ height: `${layerCount * 100}px` }} />
+      <div className="guide" style={{ height: `${layerCount * 100}px` }} />
+      <div className="guide" style={{ height: `${layerCount * 100}px` }} />
+      <div className="guide" style={{ height: `${layerCount * 100}px` }} />
+      <div className="guide" style={{ height: `${layerCount * 100}px` }} />
+      <div className="guide" style={{ height: `${layerCount * 100}px` }} />
     </>
   );
 }
@@ -474,7 +459,7 @@ function generateLockData(layerDetails: LayerDetails[]) {
     const occupiedLocations = new Set();
     const keyCount =
       Math.floor(
-        Math.random() * (layerDetails[i].keyMax - layerDetails[i].keyMin + 1)
+        Math.random() * (layerDetails[i].keyMax - layerDetails[i].keyMin + 1),
       ) + layerDetails[i].keyMin;
     const generatedKeyData: Data[] = Array.from({ length: keyCount }, () => {
       let location = Math.floor(Math.random() * 12) * 30;
@@ -500,7 +485,7 @@ function generateLockData(layerDetails: LayerDetails[]) {
     const minCircleCount = Math.max(keyCount, layerDetails[i].keyMin);
     const totalCircleCount =
       Math.floor(
-        Math.random() * (layerDetails[i].circleMax - minCircleCount + 1)
+        Math.random() * (layerDetails[i].circleMax - minCircleCount + 1),
       ) + minCircleCount;
     for (let i = 0; i < totalCircleCount - 7; i++) {
       let location = Math.floor(Math.random() * 12) * 30;

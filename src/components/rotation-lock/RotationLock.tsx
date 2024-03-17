@@ -171,7 +171,7 @@ export function RotationLock() {
     setGameKey(crypto.randomUUID());
     setTimerKey(crypto.randomUUID());
     setActiveLayer(0);
-    setLayerStatuses(["active", ...new Array(layerCount).fill("inactive")]);
+    setLayerStatuses(["active", ...new Array(layerCount - 1).fill("inactive")]);
     setLayerRotations(new Array(layerCount).fill(0));
     setLockData(
       generateLockData(
@@ -191,7 +191,10 @@ export function RotationLock() {
     setGameKey(crypto.randomUUID());
     setTimerKey(crypto.randomUUID());
     setActiveLayer(0);
-    setLayerStatuses(["active", ...new Array(newLayerCount).fill("inactive")]);
+    setLayerStatuses([
+      "active",
+      ...new Array(newLayerCount - 1).fill("inactive"),
+    ]);
     setLayerRotations(new Array(newLayerCount).fill(0));
     setLockData(
       generateLockData(

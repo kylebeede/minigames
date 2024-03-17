@@ -2,6 +2,7 @@ import { App as AntApp, Layout, Menu } from "antd";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ColorGridMinigame from "./components/color-grid";
 import RotationLock from "./components/rotation-lock";
+import QuickType from "./components/quick-type";
 
 const { Content, Footer, Header } = Layout;
 
@@ -14,6 +15,11 @@ const menuItems = [
   {
     key: "rotation-lock",
     label: <a href="/rotation-lock">Rotation Lock</a>,
+    selectable: true,
+  },
+  {
+    key: "quick-type",
+    label: <a href="/quick-type">Quick Type</a>,
     selectable: true,
   },
 ];
@@ -30,6 +36,10 @@ const router = createBrowserRouter([
   {
     path: "/rotation-lock",
     element: <RotationLock />,
+  },
+  {
+    path: "/quick-type",
+    element: <QuickType />,
   },
 ]);
 

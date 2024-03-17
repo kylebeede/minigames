@@ -1,2 +1,4 @@
+import SegmentedInput from "./SegmentedInput";
 import Timer from "./Timer";
-export { Timer };
+
+export { SegmentedInput, Timer };

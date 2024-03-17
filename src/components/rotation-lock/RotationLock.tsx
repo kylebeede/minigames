@@ -12,7 +12,7 @@ import type { CheckboxProps } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { segment } from "./circle-segment-generator";
 import { Timer } from "../shared";
-const { Title } = Typography;
+const { Title, Text } = Typography;
 import "./styles.css";
 
 interface Data {
@@ -40,6 +40,7 @@ export function RotationLock() {
 
   const [showControlPanel, setShowControlPanel] = useState(false);
   const [layerCount, setLayerCount] = useState(DEFAULT_LAYER_COUNT);
+  const [allowFailures, setAllowFailures] = useState(false);
 
   const [lockData, setLockData] = useState(
     generateLockData(
@@ -78,12 +79,14 @@ export function RotationLock() {
         setActiveLayer(Math.min(activeLayer + 1, layerCount - 1));
       } else {
         message.error("Failed");
-        const updatedLayerStatuses = [...layerStatuses];
-        updatedLayerStatuses[activeLayer] = "failed";
-        setLayerStatuses(updatedLayerStatuses);
+        if (!allowFailures) {
+          const updatedLayerStatuses = [...layerStatuses];
+          updatedLayerStatuses[activeLayer] = "failed";
+          setLayerStatuses(updatedLayerStatuses);
+        }
       }
     },
-    [activeLayer, layerCount, layerStatuses, message],
+    [activeLayer, allowFailures, layerCount, layerStatuses, message],
   );
 
   const handleRotation = useCallback(
@@ -202,6 +205,10 @@ export function RotationLock() {
     );
   }, []);
 
+  const handleAllowFailuresToggle = useCallback(() => {
+    setAllowFailures((prev) => !prev);
+  }, []);
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
 
@@ -309,7 +316,7 @@ export function RotationLock() {
                 display: "block",
               }}
             >
-              {"Layer Count"}
+              {"Layers"}
             </Title>
             <InputNumber
               min={2}
@@ -319,7 +326,7 @@ export function RotationLock() {
               value={layerCount}
             />
           </div>
-          <div>
+          <div style={{ marginTop: "8px" }}>
             <Title
               level={5}
               style={{
@@ -346,6 +353,15 @@ export function RotationLock() {
               />
             </div>
           </div>
+          <Checkbox
+            checked={allowFailures}
+            onChange={handleAllowFailuresToggle}
+            style={{ marginTop: "8px" }}
+          >
+            <Title level={5} style={{ color: "white", margin: "0" }}>
+              {"Allow failures"}
+            </Title>
+          </Checkbox>
         </div>
       )}
       <FloatButton

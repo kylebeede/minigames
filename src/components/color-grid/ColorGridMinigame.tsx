@@ -240,7 +240,7 @@ function ColorGridMinigame() {
               display: "flex",
               alignItems: "center",
               flexDirection: "row",
-              marginTop: "16px",
+              marginTop: "8px",
             }}
           >
             <div>

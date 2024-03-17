@@ -186,7 +186,7 @@ function QuickType() {
             <Title
               level={5}
               style={{
-                margin: "8px 0 0 0",
+                margin: "0",
                 color: "#FFF",
                 display: "block",
               }}
